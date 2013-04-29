@@ -183,6 +183,7 @@ app.get('/home', function(req, res) {
   return Project.findOne({
     page_name: 'home'
   }, function(error, data) {
+    console.log(data.project_title)
     return res.render('layoutHome', {
       type: data.project_title
     });
