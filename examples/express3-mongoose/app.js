@@ -5,8 +5,8 @@ var express = require('express')
   , mongoose = require('mongoose')
   , bcrypt = require('bcrypt')
   , SALT_WORK_FACTOR = 10;
-  
-mongoose.connect('localhost', 'test');
+
+mongoose.connect('localhost', 'briandb');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback() {
@@ -19,6 +19,18 @@ var userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true},
 });
+
+  var Project = mongoose.Schema({
+    project_title: {
+      type: String,
+    },
+    page_name: {
+      type: String
+    }
+  });
+
+  Project = mongoose.model('Project', Project);
+
 
 // Bcrypt middleware
 userSchema.pre('save', function(next) {
@@ -134,15 +146,15 @@ app.get('/login', function(req, res){
 //   which, in this example, will redirect the user to the home page.
 //
 //   curl -v -d "username=bob&password=secret" http://127.0.0.1:3000/login
-//   
+//
 /***** This version has a problem with flash messages
-app.post('/login', 
+app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
   function(req, res) {
     res.redirect('/');
   });
 */
-  
+
 // POST /login
 //   This is an alternative implementation that uses a custom callback to
 //   acheive the same functionality.
@@ -164,6 +176,45 @@ app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
+
+
+
+app.get('/home', function(req, res) {
+  return Project.findOne({
+    page_name: 'home'
+  }, function(error, data) {
+    return res.render('layoutHome', {
+      type: data.project_title
+    });
+  });
+});
+
+
+
+app.post('/:pagename/:project_title', function(req, res) {
+  var project, project_data;
+
+  Project.findOne({
+    page_name: req.params.pagename
+  }).remove();
+  project_data = {
+    page_name: req.params.pagename,
+  project_title: req.params.project_title
+  };
+  project = new Project(project_data);
+  project.save(function(error, data) {
+    if (error) {
+      return res.json(error);
+    } else {
+      return res.json(data);
+    }
+  });
+  return Project.findOne({
+    page_name: 'home'
+  }, function(error, data) {});
+});
+
+
 
 app.listen(3000, function() {
   console.log('Express server listening on port 3000');
