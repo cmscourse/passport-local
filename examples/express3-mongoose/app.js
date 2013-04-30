@@ -186,6 +186,7 @@ app.get('/home', function(req, res) {
     console.log(data.project_title)
     return res.render('layoutHome', {
       type: data.project_title
+      , user: req.user
     });
   });
 });

@@ -23,6 +23,6 @@ changeTxtNode = ->
         $('textarea,button').show()
         $text = $('p').text()
         $('textarea').append($text)
-changeTxtNode()
+changeTxtNode() if $('em').text() == 'bob'
 
 
